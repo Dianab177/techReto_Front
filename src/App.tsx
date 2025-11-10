@@ -9,6 +9,7 @@ import PerfilPage from "./pages/PerfilPages";
 import AdminPage from "./pages/AdminPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import ProtectedRoute from "./routes/ProtectedRoute";
+import MisRetosPage from "./components/MisRetos";
 
 export default function App() {
   return (
@@ -25,6 +26,7 @@ export default function App() {
             <Route path="/retos" element={<RetosPage />} />
             <Route path="/retos/:id" element={<RetoDetailPage />} />
             <Route path="/perfil" element={<PerfilPage />} />
+            <Route path="/mis-retos" element={<MisRetosPage />} />
             <Route path="/admin" element={<AdminPage />} />
           </Route>
 

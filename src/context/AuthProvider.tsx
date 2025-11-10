@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import type { Usuario } from "../types/Usuario";
 import { loginUsuario, registerUsuario } from "../services/usuarioService";
 import { AuthContext } from "./AuthContext";
@@ -6,6 +7,7 @@ import { AuthContext } from "./AuthContext";
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<Usuario | null>(null);
   const [token, setToken] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     try {
@@ -20,26 +22,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-
-  const login = async (email: string, password: string) => {
+  
+  const login = useCallback(async (email: string, password: string) => {
     try {
-      // El backend devuelve directamente un objeto Usuario
       const usuario = await loginUsuario(email, password);
-
       setUser(usuario);
       localStorage.setItem("tr_user", JSON.stringify(usuario));
 
-      // Por ahora no manejamos token (el backend no lo envía)
+      
       setToken(null);
       localStorage.removeItem("tr_token");
     } catch (error) {
       console.error("Error al iniciar sesión:", error);
       throw error;
     }
-  };
+  }, []);
 
- 
-  const register = async (payload: Usuario) => {
+
+  const register = useCallback(async (payload: Usuario) => {
     try {
       const usuario = await registerUsuario(payload);
       setUser(usuario);
@@ -48,20 +48,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.error("Error al registrar usuario:", error);
       throw error;
     }
-  };
+  }, []);
 
- 
-  const logout = () => {
+
+  const logout = useCallback(() => {
     setUser(null);
     setToken(null);
     localStorage.removeItem("tr_user");
     localStorage.removeItem("tr_token");
-  };
+    navigate("/");
+  }, [navigate]);
 
-  // 🔹 Valor del contexto
+  // 🔹 Valor del contexto (sin warnings)
   const value = useMemo(
     () => ({ user, token, login, register, logout }),
-    [user, token]
+    [user, token, login, register, logout]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -3,14 +3,14 @@ import axios from "axios";
 import {
   getInscripcionesPorReto,
   eliminarInscripcion,
-} from "../services/inscripcionService";
-import type { Inscripcion } from "../types/Inscripcion";
-import Loader from "../components/Loader";
-import EstadoBadge from "../components/atoms/EstadoBadge";
+} from "../../services/inscripcionService";
+import type { Inscripcion } from "../../types/Inscripcion";
+import Loader from "../Loader";
+import EstadoBadge from "../atoms/EstadoBadge";
 import Swal from "sweetalert2";
 
 interface Props {
-  idReto: number;
+  idReto?: number; // Puede llegar undefined, controlado
 }
 
 export default function TablaInscripciones({ idReto }: Props) {
@@ -22,6 +22,7 @@ export default function TablaInscripciones({ idReto }: Props) {
 
   // 🔹 Cargar inscripciones del reto
   useEffect(() => {
+    if (!idReto) return; // evita el 404 si idReto es undefined
     (async () => {
       try {
         const data = await getInscripcionesPorReto(idReto);
@@ -96,7 +97,9 @@ export default function TablaInscripciones({ idReto }: Props) {
         Participantes inscritos
       </h3>
 
-      {inscripciones.length === 0 ? (
+      {!idReto ? (
+        <p className="text-gray-400">No se encontró el reto.</p>
+      ) : inscripciones.length === 0 ? (
         <p className="text-gray-400">No hay inscripciones aún.</p>
       ) : (
         <table className="w-full text-left text-gray-300">
@@ -167,9 +170,9 @@ export default function TablaInscripciones({ idReto }: Props) {
             </h2>
 
             <label className="block mb-3 text-sm">
-              Estado:
+              Estado de entrega:
               <select
-                value={inscripcionSeleccionada.estadoEntrega}
+                value={inscripcionSeleccionada.estadoEntrega || "PENDIENTE"}
                 onChange={(e) =>
                   setInscripcionSeleccionada({
                     ...inscripcionSeleccionada,
