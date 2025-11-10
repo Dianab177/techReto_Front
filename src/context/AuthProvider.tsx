@@ -8,26 +8,49 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
 
   useEffect(() => {
-    const savedUser = localStorage.getItem("tr_user");
-    const savedToken = localStorage.getItem("tr_token");
-    if (savedUser) setUser(JSON.parse(savedUser));
-    if (savedToken) setToken(savedToken);
+    try {
+      const savedUser = localStorage.getItem("tr_user");
+      const savedToken = localStorage.getItem("tr_token");
+
+      if (savedUser) setUser(JSON.parse(savedUser));
+      if (savedToken) setToken(savedToken);
+    } catch (e) {
+      console.error("Error al recuperar usuario del localStorage:", e);
+      localStorage.clear();
+    }
   }, []);
 
+
   const login = async (email: string, password: string) => {
-    const { usuario, token } = await loginUsuario(email, password);
-    setUser(usuario);
-    if (token) setToken(token);
-    localStorage.setItem("tr_user", JSON.stringify(usuario));
-    if (token) localStorage.setItem("tr_token", token);
+    try {
+      // El backend devuelve directamente un objeto Usuario
+      const usuario = await loginUsuario(email, password);
+
+      setUser(usuario);
+      localStorage.setItem("tr_user", JSON.stringify(usuario));
+
+      // Por ahora no manejamos token (el backend no lo envía)
+      setToken(null);
+      localStorage.removeItem("tr_token");
+    } catch (error) {
+      console.error("Error al iniciar sesión:", error);
+      throw error;
+    }
   };
 
+ 
   const register = async (payload: Usuario) => {
-    const usuario = await registerUsuario(payload);
-    setUser(usuario);
-    localStorage.setItem("tr_user", JSON.stringify(usuario));
+    try {
+      const usuario = await registerUsuario(payload);
+      setUser(usuario);
+      localStorage.setItem("tr_user", JSON.stringify(usuario));
+    } catch (error) {
+      console.error("Error al registrar usuario:", error);
+      throw error;
+    }
   };
 
+ 
   const logout = () => {
     setUser(null);
     setToken(null);
@@ -35,7 +58,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem("tr_token");
   };
 
-  const value = useMemo(() => ({ user, token, login, register, logout }), [user, token]);
+  // 🔹 Valor del contexto
+  const value = useMemo(
+    () => ({ user, token, login, register, logout }),
+    [user, token]
+  );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

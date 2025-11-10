@@ -1,9 +1,7 @@
-export type Rol = "ADMIN" | "EMPRESA" | "PARTICIPANTE";
-
 export interface Usuario {
-  id_usuario?: number;
+  idUsuario?: number;
   nombre: string;
   email: string;
   password?: string;
-  rol: Rol;
+  rol: "ADMIN" | "EMPRESA" | "PARTICIPANTE";
 }

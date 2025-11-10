@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { getReto } from "../services/retoServices";
+import { inscribirse } from "../services/inscripcionService";
+import { useAuth } from "../hooks/useAuth";
+import Swal from "sweetalert2";
 import type { Reto } from "../types/Reto";
 import Loader from "../components/Loader";
 
@@ -10,18 +13,24 @@ export default function RetoDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
   useEffect(() => {
+    if (!id) return;
+
     (async () => {
       try {
-        setReto(await getReto(Number(id)));
+        const data = await getReto(Number(id));
+        setReto(data);
       } catch (err: unknown) {
         if (err instanceof Error) {
           setError(err.message);
         } else if (typeof err === "object" && err && "response" in err) {
           const axiosErr = err as { response?: { data?: { message?: string } } };
-          setError(axiosErr.response?.data?.message || "Error cargando reto");
+          setError(axiosErr.response?.data?.message || "Error cargando el reto");
         } else {
-          setError("Error cargando reto");
+          setError("Error desconocido");
         }
       } finally {
         setLoading(false);
@@ -29,14 +38,60 @@ export default function RetoDetailPage() {
     })();
   }, [id]);
 
+  const handleInscribirse = async () => {
+    if (!user) {
+      Swal.fire("Debes iniciar sesión", "Inicia sesión para inscribirte", "warning");
+      navigate("/login");
+      return;
+    }
+
+    try {
+      // ✅ IMPORTANTE: el backend espera `idUsuario`, no `idUsuario`
+      await inscribirse(user!.idUsuario!, Number(id!));
+      Swal.fire("¡Te has inscrito con éxito!", "", "success");
+    } catch (error) {
+      console.error("Error al inscribirse:", error);
+      Swal.fire(
+        "Error al inscribirte",
+        "Ya estás inscrito o hubo un problema con el servidor",
+        "error"
+      );
+    }
+  };
+
   if (loading) return <Loader />;
   if (error) return <div className="text-red-600">{error}</div>;
-  if (!reto) return <div>No encontrado</div>;
+  if (!reto) return <div>No se encontró el reto</div>;
 
   return (
-    <article className="bg-white rounded-lg border p-4">
-      <h2 className="text-2xl font-bold">{reto.titulo}</h2>
-      <p className="mt-2 text-slate-700 whitespace-pre-line">{reto.descripcion}</p>
-    </article>
+    <section className="p-6 bg-slate-900 text-white rounded-lg max-w-3xl mx-auto mt-6 shadow-lg">
+      <h2 className="text-2xl font-bold mb-2">{reto.titulo}</h2>
+      <p className="mb-4 text-gray-300">{reto.descripcion}</p>
+
+      <div className="grid grid-cols-2 gap-2 text-sm text-gray-400">
+        <p><strong>Tipo:</strong> {reto.tipo}</p>
+        <p><strong>Estado:</strong> {reto.estado}</p>
+        <p><strong>Recompensa:</strong> {reto.recompensa}</p>
+        <p><strong>Fecha inicio:</strong> {reto.fechaInicio || "No especificada"}</p>
+        <p><strong>Fecha fin:</strong> {reto.fechaFin || "No especificada"}</p>
+      </div>
+
+      {reto.empresa && (
+        <div className="mt-4 border-t border-gray-700 pt-3">
+          <h3 className="text-lg font-semibold">Empresa</h3>
+          <p><strong>Nombre:</strong> {reto.empresa.nombre}</p>
+          <p><strong>Email:</strong> {reto.empresa.email}</p>
+        </div>
+      )}
+
+      {user?.rol === "PARTICIPANTE" && (
+        <button
+          onClick={handleInscribirse}
+          className="mt-6 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded"
+        >
+          Inscribirme en este reto
+        </button>
+      )}
+    </section>
   );
 }

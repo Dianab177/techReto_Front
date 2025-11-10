@@ -1,8 +1,15 @@
 export interface Reto {
-  id_reto: number;
+  idReto: number; 
   titulo: string;
   descripcion: string;
-  fecha_inicio?: string;
-  fecha_fin?: string;
-  estado?: string; // ACTIVO, CERRADO, etc.
+  tipo: string;
+  estado: string;
+  recompensa: string;
+  fechaInicio?: string;
+  fechaFin?: string;
+  empresa?: {
+    idUsuario: number;
+    nombre: string;
+    email: string;
+  };
 }

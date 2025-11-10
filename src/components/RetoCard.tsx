@@ -3,17 +3,22 @@ import type { Reto } from "../types/Reto";
 
 export default function RetoCard({ reto }: { reto: Reto }) {
   return (
-    <div className="rounded-lg border bg-white p-4">
-      <div className="flex items-center justify-between">
-        <h3 className="font-semibold text-lg">{reto.titulo}</h3>
-        {reto.estado && (
-          <span className="text-xs px-2 py-1 rounded bg-slate-100 border">{reto.estado}</span>
-        )}
+    <article className="bg-white p-4 rounded shadow-md hover:shadow-lg transition">
+      <h3 className="font-bold text-lg text-slate-900">{reto.titulo}</h3>
+      <p className="text-gray-700 text-sm mt-1">{reto.descripcion}</p>
+
+      <div className="mt-3 text-xs text-gray-500">
+        <p>Tipo: {reto.tipo}</p>
+        <p>Estado: {reto.estado}</p>
+        <p>Recompensa: {reto.recompensa}</p>
       </div>
-      <p className="text-sm text-slate-600 mt-2 line-clamp-3">{reto.descripcion}</p>
-      <Link to={`/retos/${reto.id_reto}`} className="inline-block mt-3 text-sm text-blue-700">
-        Ver detalle →
+
+      <Link
+        to={`/retos/${reto.idReto}`}  // 👈 aquí se usa idReto
+        className="inline-block mt-4 px-3 py-1 bg-slate-900 text-white rounded text-sm hover:bg-slate-700"
+      >
+        Ver descripción
       </Link>
-    </div>
+    </article>
   );
 }

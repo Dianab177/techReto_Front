@@ -18,7 +18,6 @@ export default function LoginPage() {
       navigate("/retos");
     } catch (err) {
       if (err instanceof Error) {
-        // Error genérico de JS
         setError(err.message);
       } else if (typeof err === "object" && err && "response" in err) {
         const axiosErr = err as { response?: { data?: { message?: string } } };

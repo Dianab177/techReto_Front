@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getRetos } from "../services/retoServices"; // ✅ asegúrate de que el archivo se llama retoService.ts (sin la “s” final)
+import { getRetos } from "../services/retoServices";
 import type { Reto } from "../types/Reto";
 import RetoCard from "../components/RetoCard";
 import Loader from "../components/Loader";
@@ -19,7 +19,6 @@ export default function RetosPage() {
           // Error genérico de JS
           setError(err.message);
         } else if (typeof err === "object" && err && "response" in err) {
-          // Error de Axios (HTTP)
           const axiosErr = err as { response?: { data?: { message?: string } } };
           setError(axiosErr.response?.data?.message || "Error cargando retos");
         } else {
@@ -37,7 +36,7 @@ export default function RetosPage() {
   return (
     <section className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
       {retos.map((r) => (
-        <RetoCard key={r.id_reto} reto={r} />
+        <RetoCard key={r.idReto} reto={r} />
       ))}
     </section>
   );

@@ -107,13 +107,13 @@ export default function AdminPage() {
           <p className="text-slate-500">No hay retos creados todavía.</p>
         )}
         {retos.map((reto) => (
-          <div key={reto.id_reto} className="border rounded-lg bg-white p-4 flex justify-between items-start">
+          <div key={reto.idReto} className="border rounded-lg bg-white p-4 flex justify-between items-start">
             <div>
               <h3 className="font-semibold text-lg">{reto.titulo}</h3>
               <p className="text-sm text-slate-600">{reto.descripcion}</p>
             </div>
             <button
-              onClick={() => eliminarReto(reto.id_reto)}
+              onClick={() => eliminarReto(reto.idReto)}
               className="text-red-600 text-sm hover:underline"
             >
               Eliminar
