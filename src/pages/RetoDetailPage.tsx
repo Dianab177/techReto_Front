@@ -1,26 +1,30 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import Swal from "sweetalert2";
-
 import { getReto } from "../services/retoServices";
-import { inscribirse } from "../services/inscripcionService";
-
+import {
+  inscribirse,
+  getInscripcionesUsuario,
+} from "../services/inscripcionService";
 import { useAuth } from "../hooks/useAuth";
-import Loader from "../components/Loader";
-import TablaInscripciones from "../components/organisms/TablaInscripciones"; // ✅ IMPORTACIÓN CORRECTA
-
+import Swal from "sweetalert2";
 import type { Reto } from "../types/Reto";
+import type { Inscripcion } from "../types/Inscripcion";
+import Loader from "../components/Loader";
+import type { AxiosError } from "axios";
 
 export default function RetoDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const [reto, setReto] = useState<Reto | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [yaInscrito, setYaInscrito] = useState(false);
 
-  const { user } = useAuth();
-
+  // ===============================
+  // CARGAR RETO
+  // ===============================
   useEffect(() => {
     if (!id) return;
 
@@ -29,14 +33,43 @@ export default function RetoDetailPage() {
         const data = await getReto(Number(id));
         setReto(data);
       } catch (err: unknown) {
-        console.error("Error cargando reto:", err);
-        if (err instanceof Error) setError(err.message);
-        else setError("Error cargando el reto");
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError("Error cargando el reto");
+        }
       } finally {
         setLoading(false);
       }
     })();
   }, [id]);
+
+  // ===============================
+  // COMPROBAR SI YA ESTÁ INSCRITA
+  // ===============================
+  const userId = user?.idUsuario;
+
+  useEffect(() => {
+    if (!userId || !id) return;
+
+    (async () => {
+      try {
+        const data = await getInscripcionesUsuario(userId);
+        const retoId = Number(id);
+        const inscrito = data.some(
+          (i: Inscripcion) => i.reto?.idReto === retoId
+        );
+
+        setYaInscrito(inscrito);
+      } catch (err) {
+        console.error("Error verificando inscripción:", err);
+      }
+    })();
+  }, [userId, id]);
+
+  // ===============================
+  // INSCRIBIRSE
+  // ===============================
 
   const handleInscribirse = async () => {
     if (!user) {
@@ -51,21 +84,41 @@ export default function RetoDetailPage() {
 
     try {
       await inscribirse(user.idUsuario!, Number(id));
-      Swal.fire("¡Inscripción realizada!", "", "success");
-    } catch (err) {
-      console.error("Error al inscribirse:", err);
-      Swal.fire("Error", "No se pudo realizar la inscripción", "error");
+      Swal.fire("¡Te has inscrito con éxito!", "", "success");
+    } catch (err: unknown) {
+      const error = err as AxiosError<string>;
+      console.error("Error al inscribirse:", error);
+
+      const backendMessage = error.response?.data;
+
+      if (backendMessage === "El usuario ya está inscrito") {
+        Swal.fire(
+          "Ya estás inscrita",
+          "No puedes volver a apuntarte a un reto en el que ya participaste.",
+          "info"
+        );
+        return;
+      }
+
+      Swal.fire(
+        "No se pudo realizar la inscripción",
+        "Ocurrió un error inesperado.",
+        "error"
+      );
     }
   };
 
+  // ===============================
+  // RENDER
+  // ===============================
   if (loading) return <Loader />;
-  if (error) return <div className="text-red-400">{error}</div>;
+  if (error) return <div className="text-red-600">{error}</div>;
   if (!reto) return <div>No se encontró el reto</div>;
 
   return (
-    <section className="p-6 bg-slate-900 text-white rounded-lg max-w-4xl mx-auto mt-6 shadow-lg">
-      <h2 className="text-3xl font-bold mb-2">{reto.titulo}</h2>
-      <p className="text-gray-300 mb-4">{reto.descripcion}</p>
+    <section className="p-6 bg-slate-900 text-white rounded-lg max-w-3xl mx-auto mt-6 shadow-lg">
+      <h2 className="text-2xl font-bold mb-2">{reto.titulo}</h2>
+      <p className="mb-4 text-gray-300">{reto.descripcion}</p>
 
       <div className="grid grid-cols-2 gap-2 text-sm text-gray-400">
         <p>
@@ -86,7 +139,7 @@ export default function RetoDetailPage() {
       </div>
 
       {reto.empresa && (
-        <div className="mt-5 border-t border-gray-700 pt-4">
+        <div className="mt-4 border-t border-gray-700 pt-3">
           <h3 className="text-lg font-semibold">Empresa</h3>
           <p>
             <strong>Nombre:</strong> {reto.empresa.nombre}
@@ -98,18 +151,20 @@ export default function RetoDetailPage() {
       )}
 
       {user?.rol === "PARTICIPANTE" && (
-        <button
-          onClick={handleInscribirse}
-          className="mt-6 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded"
-        >
-          Inscribirme en este reto
-        </button>
-      )}
-
-      {user?.rol === "EMPRESA" && (
-        <div className="mt-10">
-          <TablaInscripciones idReto={reto.idReto} />
-        </div>
+        <>
+          {!yaInscrito ? (
+            <button
+              onClick={handleInscribirse}
+              className="mt-6 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded"
+            >
+              Inscribirme en este reto
+            </button>
+          ) : (
+            <p className="mt-6 text-emerald-400 font-semibold">
+              ✔ Ya estás inscrita en este reto
+            </p>
+          )}
+        </>
       )}
     </section>
   );

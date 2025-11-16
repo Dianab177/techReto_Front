@@ -1,39 +1,57 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../hooks/useAuth";
-import { getInscripcionesUsuario, eliminarInscripcion } from "../services/inscripcionService";
+import {
+  getInscripcionesUsuario,
+  eliminarInscripcion,
+} from "../services/inscripcionService";
 import Swal from "sweetalert2";
-
-interface Reto {
-  idReto: number;
-  titulo: string;
-  fechaInicio?: string;
-  fechaFin?: string;
-  empresa?: { nombre: string };
-}
-
-interface Inscripcion {
-  idInscripcion: number;
-  estado: string;
-  fechaInscripcion: string;
-  reto: Reto;
-}
+import type { Inscripcion } from "../types/Inscripcion";
 
 export default function MisRetos() {
   const { user } = useAuth();
   const [inscripciones, setInscripciones] = useState<Inscripcion[]>([]);
   const [loading, setLoading] = useState(true);
 
- useEffect(() => {
-  if (!user?.idUsuario) return;
+  // ============================================================
+  //   FUNCIÓN PARA CALCULAR LA VALORACIÓN DEL RETO
+  // ============================================================
+  function obtenerValoracion(ins: Inscripcion): string {
+    const fechaFin = ins.reto?.fechaFin ? new Date(ins.reto.fechaFin) : null;
+    const hoy = new Date();
 
-  (async () => {
-    const data = await getInscripcionesUsuario(user.idUsuario!);
-    setInscripciones(data);
-    setLoading(false);
-  })();
-}, [user]);
+    if (ins.estadoAprobacion === "APROBADO") return "Aprobado";
+    if (ins.estadoAprobacion === "RECHAZADO") return "Rechazado";
 
+    if (ins.estadoEntrega === "ENTREGADO") return "Pendiente evaluación";
 
+    if (fechaFin && hoy > fechaFin && ins.estadoEntrega === "PENDIENTE") {
+      return "No entregado (vencido)";
+    }
+
+    return "Pendiente";
+  }
+
+  // ============================================================
+  //   CARGAR INSCRIPCIONES DEL USUARIO
+  // ============================================================
+  useEffect(() => {
+    if (!user?.idUsuario) return;
+
+    (async () => {
+      try {
+        const data = await getInscripcionesUsuario(Number(user.idUsuario));
+        setInscripciones(data);
+      } catch (err) {
+        console.error("Error cargando inscripciones:", err);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [user]);
+
+  // ============================================================
+  //   DARSE DE BAJA DE UN RETO
+  // ============================================================
   const handleEliminar = async (id: number) => {
     const confirm = await Swal.fire({
       title: "¿Deseas darte de baja de este reto?",
@@ -45,14 +63,22 @@ export default function MisRetos() {
 
     if (confirm.isConfirmed) {
       await eliminarInscripcion(id);
-      setInscripciones(prev => prev.filter(i => i.idInscripcion !== id));
+      setInscripciones((prev) => prev.filter((i) => i.idInscripcion !== id));
       Swal.fire("Baja completada", "Has sido eliminado del reto", "success");
     }
   };
 
-  if (loading) return <p>Cargando...</p>;
+  // ============================================================
+  //   RENDER
+  // ============================================================
+  if (loading) return <p className="text-center mt-10">Cargando...</p>;
+
   if (!inscripciones.length)
-    return <p className="text-center mt-10 text-gray-600">Aún no estás inscrito en ningún reto.</p>;
+    return (
+      <p className="text-center mt-10 text-gray-600">
+        Aún no estás inscrito en ningún reto.
+      </p>
+    );
 
   return (
     <section className="max-w-5xl mx-auto p-6 bg-white rounded-lg shadow">
@@ -66,17 +92,28 @@ export default function MisRetos() {
             <th className="p-2">Inicio</th>
             <th className="p-2">Fin</th>
             <th className="p-2">Estado</th>
+            <th className="p-2">Valoración</th> {/* ← Nueva columna */}
             <th className="p-2">Acción</th>
           </tr>
         </thead>
+
         <tbody>
-          {inscripciones.map(i => (
-            <tr key={i.idInscripcion} className="border-t border-gray-200 text-center">
+          {inscripciones.map((i) => (
+            <tr
+              key={i.idInscripcion}
+              className="border-t border-gray-200 text-center"
+            >
               <td className="p-2 text-left">{i.reto?.titulo}</td>
               <td>{i.reto?.empresa?.nombre || "—"}</td>
               <td>{i.reto?.fechaInicio || "—"}</td>
               <td>{i.reto?.fechaFin || "—"}</td>
+
+              {/* Estado simple */}
               <td>{i.estado}</td>
+
+              {/* VALORACIÓN CALCULADA */}
+              <td>{obtenerValoracion(i)}</td>
+
               <td>
                 <button
                   onClick={() => handleEliminar(i.idInscripcion)}
