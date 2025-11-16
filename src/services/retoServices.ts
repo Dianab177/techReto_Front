@@ -10,3 +10,8 @@ export const getReto = async (id: number): Promise<Reto> => {
   const { data } = await api.get(`/retos/${id}`);
   return data;
 };
+
+export async function getRetosEmpresa(idEmpresa: number) {
+  const { data } = await api.get(`/retos/empresa/${idEmpresa}`);
+  return data;
+}
