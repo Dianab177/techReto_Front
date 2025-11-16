@@ -1,207 +1,116 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
-import {
-  getInscripcionesPorReto,
-  eliminarInscripcion,
-} from "../services/inscripcionService";
-import type { Inscripcion } from "../types/Inscripcion";
-import Loader from "../components/Loader";
-import EstadoBadge from "../components/atoms/EstadoBadge";
+import { useParams, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 
-interface Props {
-  idReto: number;
-}
+import { getReto } from "../services/retoServices";
+import { inscribirse } from "../services/inscripcionService";
 
-export default function TablaInscripciones({ idReto }: Props) {
-  const [inscripciones, setInscripciones] = useState<Inscripcion[]>([]);
+import { useAuth } from "../hooks/useAuth";
+import Loader from "../components/Loader";
+import TablaInscripciones from "../components/organisms/TablaInscripciones"; // ✅ IMPORTACIÓN CORRECTA
+
+import type { Reto } from "../types/Reto";
+
+export default function RetoDetailPage() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+
+  const [reto, setReto] = useState<Reto | null>(null);
   const [loading, setLoading] = useState(true);
-  const [inscripcionSeleccionada, setInscripcionSeleccionada] =
-    useState<Inscripcion | null>(null);
-  const [mostrarModal, setMostrarModal] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // 🔹 Cargar inscripciones del reto
+  const { user } = useAuth();
+
   useEffect(() => {
+    if (!id) return;
+
     (async () => {
       try {
-        const data = await getInscripcionesPorReto(idReto);
-        setInscripciones(data);
-      } catch (error) {
-        console.error("Error al cargar inscripciones:", error);
-        Swal.fire("Error", "No se pudieron cargar las inscripciones", "error");
+        const data = await getReto(Number(id));
+        setReto(data);
+      } catch (err: unknown) {
+        console.error("Error cargando reto:", err);
+        if (err instanceof Error) setError(err.message);
+        else setError("Error cargando el reto");
       } finally {
         setLoading(false);
       }
     })();
-  }, [idReto]);
+  }, [id]);
 
-  // 🔹 Eliminar inscripción
-  const handleEliminar = async (idInscripcion: number) => {
-    const confirm = await Swal.fire({
-      title: "¿Eliminar inscripción?",
-      text: "Esta acción no se puede deshacer.",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "Sí, eliminar",
-      cancelButtonText: "Cancelar",
-      confirmButtonColor: "#dc2626",
-    });
-
-    if (confirm.isConfirmed) {
-      try {
-        await eliminarInscripcion(idInscripcion);
-        Swal.fire("Eliminado", "La inscripción fue eliminada", "success");
-        setInscripciones((prev) =>
-          prev.filter((i) => i.idInscripcion !== idInscripcion)
-        );
-      } catch (error) {
-        console.error("Error al eliminar:", error);
-        Swal.fire("Error", "No se pudo eliminar la inscripción", "error");
-      }
+  const handleInscribirse = async () => {
+    if (!user) {
+      Swal.fire(
+        "Debes iniciar sesión",
+        "Inicia sesión para inscribirte",
+        "warning"
+      );
+      navigate("/login");
+      return;
     }
-  };
-
-  // 🔹 Guardar cambios en el modal
-  const handleGuardar = async () => {
-    if (!inscripcionSeleccionada) return;
 
     try {
-      await axios.put(
-        `http://localhost:8080/api/inscripciones/${inscripcionSeleccionada.idInscripcion}`,
-        inscripcionSeleccionada
-      );
-
-      Swal.fire("Guardado", "Estado actualizado correctamente", "success");
-      setMostrarModal(false);
-
-      // Actualizar la tabla localmente
-      setInscripciones((prev) =>
-        prev.map((i) =>
-          i.idInscripcion === inscripcionSeleccionada.idInscripcion
-            ? inscripcionSeleccionada
-            : i
-        )
-      );
-    } catch (error) {
-      console.error("Error al actualizar inscripción:", error);
-      Swal.fire("Error", "No se pudo actualizar la inscripción", "error");
+      await inscribirse(user.idUsuario!, Number(id));
+      Swal.fire("¡Inscripción realizada!", "", "success");
+    } catch (err) {
+      console.error("Error al inscribirse:", err);
+      Swal.fire("Error", "No se pudo realizar la inscripción", "error");
     }
   };
 
   if (loading) return <Loader />;
+  if (error) return <div className="text-red-400">{error}</div>;
+  if (!reto) return <div>No se encontró el reto</div>;
 
   return (
-    <div className="mt-6 bg-slate-800 p-4 rounded-lg shadow-md">
-      <h3 className="text-xl font-semibold mb-4 text-white">
-        Participantes inscritos
-      </h3>
+    <section className="p-6 bg-slate-900 text-white rounded-lg max-w-4xl mx-auto mt-6 shadow-lg">
+      <h2 className="text-3xl font-bold mb-2">{reto.titulo}</h2>
+      <p className="text-gray-300 mb-4">{reto.descripcion}</p>
 
-      {inscripciones.length === 0 ? (
-        <p className="text-gray-400">No hay inscripciones aún.</p>
-      ) : (
-        <table className="w-full text-left text-gray-300">
-          <thead className="bg-slate-700 text-sm uppercase">
-            <tr>
-              <th className="py-2 px-3">#</th>
-              <th className="py-2 px-3">Usuario / Equipo</th>
-              <th className="py-2 px-3">Fecha inscripción</th>
-              <th className="py-2 px-3">Entrega</th>
-              <th className="py-2 px-3">Aprobado</th>
-              <th className="py-2 px-3">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {inscripciones.map((i, idx) => (
-              <tr
-                key={i.idInscripcion}
-                className="border-b border-slate-600 hover:bg-slate-700 transition"
-              >
-                <td className="py-2 px-3">{idx + 1}</td>
-                <td className="py-2 px-3">
-                  {i.equipo ? (
-                    <span className="font-semibold text-emerald-400">
-                      🧑‍🤝‍🧑 {i.equipo.nombre}
-                    </span>
-                  ) : (
-                    i.usuario?.nombre
-                  )}
-                </td>
-                <td className="py-2 px-3">
-                  {new Date(i.fechaInscripcion).toLocaleDateString()}
-                </td>
-                <td className="py-2 px-3">
-                  <EstadoBadge estado={i.estadoEntrega || "PENDIENTE"} />
-                </td>
-                <td className="py-2 px-3">
-                  <EstadoBadge estado={i.estadoAprobacion || "—"} />
-                </td>
-                <td className="py-2 px-3 flex gap-2">
-                  <button
-                    onClick={() => {
-                      setInscripcionSeleccionada(i);
-                      setMostrarModal(true);
-                    }}
-                    className="bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded text-xs"
-                  >
-                    ✏️ Editar
-                  </button>
-                  <button
-                    onClick={() => handleEliminar(i.idInscripcion)}
-                    className="bg-red-600 hover:bg-red-700 px-2 py-1 rounded text-xs"
-                  >
-                    ❌ Eliminar
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+      <div className="grid grid-cols-2 gap-2 text-sm text-gray-400">
+        <p>
+          <strong>Tipo:</strong> {reto.tipo}
+        </p>
+        <p>
+          <strong>Estado:</strong> {reto.estado}
+        </p>
+        <p>
+          <strong>Recompensa:</strong> {reto.recompensa}
+        </p>
+        <p>
+          <strong>Fecha inicio:</strong> {reto.fechaInicio || "No especificada"}
+        </p>
+        <p>
+          <strong>Fecha fin:</strong> {reto.fechaFin || "No especificada"}
+        </p>
+      </div>
 
-      {/* 🔹 Modal de edición */}
-      {mostrarModal && inscripcionSeleccionada && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white text-black p-6 rounded-lg shadow-lg w-96">
-            <h2 className="text-lg font-semibold mb-4">
-              Editar inscripción #{inscripcionSeleccionada.idInscripcion}
-            </h2>
-
-            <label className="block mb-3 text-sm">
-              Estado:
-              <select
-                value={inscripcionSeleccionada.estadoEntrega}
-                onChange={(e) =>
-                  setInscripcionSeleccionada({
-                    ...inscripcionSeleccionada,
-                    estadoEntrega: e.target.value,
-                  })
-                }
-                className="block w-full mt-1 p-2 border rounded"
-              >
-                <option value="PENDIENTE">Pendiente</option>
-                <option value="ENTREGADO">Entregado</option>
-                <option value="APROBADO">Aprobado</option>
-                <option value="RECHAZADO">Rechazado</option>
-              </select>
-            </label>
-
-            <div className="flex justify-end gap-2 mt-4">
-              <button
-                onClick={() => setMostrarModal(false)}
-                className="px-4 py-2 bg-gray-500 text-white rounded"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={handleGuardar}
-                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded"
-              >
-                Guardar
-              </button>
-            </div>
-          </div>
+      {reto.empresa && (
+        <div className="mt-5 border-t border-gray-700 pt-4">
+          <h3 className="text-lg font-semibold">Empresa</h3>
+          <p>
+            <strong>Nombre:</strong> {reto.empresa.nombre}
+          </p>
+          <p>
+            <strong>Email:</strong> {reto.empresa.email}
+          </p>
         </div>
       )}
-    </div>
+
+      {user?.rol === "PARTICIPANTE" && (
+        <button
+          onClick={handleInscribirse}
+          className="mt-6 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded"
+        >
+          Inscribirme en este reto
+        </button>
+      )}
+
+      {user?.rol === "EMPRESA" && (
+        <div className="mt-10">
+          <TablaInscripciones idReto={reto.idReto} />
+        </div>
+      )}
+    </section>
   );
 }
