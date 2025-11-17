@@ -15,3 +15,4 @@ export async function getRetosEmpresa(idEmpresa: number) {
   const { data } = await api.get(`/retos/empresa/${idEmpresa}`);
   return data;
 }
+
