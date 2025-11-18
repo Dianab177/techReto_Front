@@ -1,10 +1,16 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { getRetosEmpresa } from "../services/retoServices";
 import { api } from "../services/api";
 import type { Reto } from "../types/Reto";
 import Loader from "../components/Loader";
 import { useAuth } from "../hooks/useAuth";
 import Swal from "sweetalert2";
+
+function normalizarFecha(fecha?: string | null): string {
+  if (!fecha) return "";
+  // Si viene como "2025-10-01T00:00:00"
+  return fecha.split("T")[0];
+}
 
 export default function AdminPage() {
   const { user } = useAuth();
@@ -22,13 +28,13 @@ export default function AdminPage() {
   const [fechaInicio, setFechaInicio] = useState("");
   const [fechaFin, setFechaFin] = useState("");
 
-  // Modal de edición
+  // Modal de edición (guarda un reto completo)
   const [editando, setEditando] = useState<Reto | null>(null);
 
   // ============================
   // Cargar retos de la empresa
   // ============================
-  const cargarRetos = async () => {
+  const cargarRetos = useCallback(async () => {
     if (!user?.idUsuario) return;
 
     try {
@@ -41,11 +47,11 @@ export default function AdminPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.idUsuario]);
 
   useEffect(() => {
     cargarRetos();
-  }, [user]);
+  }, [cargarRetos]);
 
   // ============================
   // Crear reto
@@ -54,7 +60,7 @@ export default function AdminPage() {
     e.preventDefault();
 
     if (!titulo.trim() || !descripcion.trim()) {
-      setError("Debes completar todos los campos obligatorios");
+      setError("Debes completar al menos título y descripción");
       return;
     }
 
@@ -80,7 +86,7 @@ export default function AdminPage() {
       setFechaFin("");
 
       cargarRetos();
-    } catch (err: unknown) {
+    } catch (err) {
       console.error("Error creando reto:", err);
       setError("Error al crear el reto");
     }
@@ -105,7 +111,6 @@ export default function AdminPage() {
     try {
       await api.delete(`/retos/${id}`);
       Swal.fire("Eliminado", "El reto fue eliminado", "success");
-
       cargarRetos();
     } catch (err) {
       console.error(err);
@@ -166,9 +171,7 @@ export default function AdminPage() {
         <div className="grid grid-cols-2 gap-4">
           <select
             value={tipo}
-            onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-              setTipo(e.target.value as "INDIVIDUAL" | "EQUIPO")
-            }
+            onChange={(e) => setTipo(e.target.value as "INDIVIDUAL" | "EQUIPO")}
             className="border p-2 rounded"
           >
             <option value="INDIVIDUAL">Individual</option>
@@ -230,6 +233,10 @@ export default function AdminPage() {
             <div>
               <h3 className="font-bold text-lg">{r.titulo}</h3>
               <p className="text-sm text-slate-600">{r.descripcion}</p>
+              <p className="text-xs text-slate-500 mt-1">
+                Tipo: {r.tipo} · Estado: {r.estado} ·{" "}
+                {r.recompensa || "Sin recompensa"}
+              </p>
             </div>
 
             <div className="flex gap-3 items-start">
@@ -252,29 +259,99 @@ export default function AdminPage() {
       </div>
 
       {/* ===================
-          MODAL EDICIÓN
+          MODAL EDICIÓN COMPLETA
       =================== */}
       {editando && (
-        <div className="fixed inset-0 bg-black/50 flex justify-center items-center">
-          <div className="bg-white p-6 rounded shadow w-96">
+        <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
+          <div className="bg-white p-6 rounded shadow w-[420px]">
             <h2 className="text-xl font-bold mb-4">Editar reto</h2>
 
+            {/* Título */}
             <input
               type="text"
-              value={editando.titulo}
+              value={editando.titulo ?? ""}
               onChange={(e) =>
                 setEditando({ ...editando, titulo: e.target.value })
               }
               className="border p-2 w-full rounded mb-2"
+              placeholder="Título"
             />
 
+            {/* Descripción */}
             <textarea
-              value={editando.descripcion}
+              value={editando.descripcion ?? ""}
               onChange={(e) =>
                 setEditando({ ...editando, descripcion: e.target.value })
               }
-              className="border p-2 w-full rounded mb-2"
+              className="border p-2 w-full rounded mb-2 min-h-[70px]"
+              placeholder="Descripción"
             />
+
+            {/* Tipo y Estado */}
+            <div className="grid grid-cols-2 gap-3 mb-2">
+              <select
+                value={editando.tipo ?? "INDIVIDUAL"}
+                onChange={(e) =>
+                  setEditando({
+                    ...editando,
+                    tipo: e.target.value as "INDIVIDUAL" | "EQUIPO",
+                  })
+                }
+                className="border p-2 rounded"
+              >
+                <option value="INDIVIDUAL">Individual</option>
+                <option value="EQUIPO">Equipo</option>
+              </select>
+
+              <select
+                value={editando.estado ?? "ABIERTO"}
+                onChange={(e) =>
+                  setEditando({
+                    ...editando,
+                    estado: e.target.value as
+                      | "ABIERTO"
+                      | "EN_CURSO"
+                      | "CERRADO",
+                  })
+                }
+                className="border p-2 rounded"
+              >
+                <option value="ABIERTO">Abierto</option>
+                <option value="EN_CURSO">En curso</option>
+                <option value="CERRADO">Cerrado</option>
+              </select>
+            </div>
+
+            {/* Recompensa */}
+            <input
+              type="text"
+              value={editando.recompensa ?? ""}
+              onChange={(e) =>
+                setEditando({ ...editando, recompensa: e.target.value })
+              }
+              className="border p-2 w-full rounded mb-2"
+              placeholder="Recompensa"
+            />
+
+            {/* Fechas */}
+            <div className="grid grid-cols-2 gap-3 mb-4">
+              <input
+                type="date"
+                value={normalizarFecha(editando.fechaInicio)}
+                onChange={(e) =>
+                  setEditando({ ...editando, fechaInicio: e.target.value })
+                }
+                className="border p-2 rounded"
+              />
+              <input
+                type="date"
+                value={normalizarFecha(editando.fechaFin)}
+                onChange={(e) =>
+                  setEditando({ ...editando, fechaFin: e.target.value })
+                }
+                className="border p-2 rounded"
+              />
+            </div>
 
             <button
               onClick={guardarEdicion}

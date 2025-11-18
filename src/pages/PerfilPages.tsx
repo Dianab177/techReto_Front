@@ -1,5 +1,6 @@
 import { useAuth } from "../hooks/useAuth";
-import MisRetos  from "../components/MisRetos";
+import MisRetos from "../components/MisRetos";
+import PerfilEmpresa from "../components/PerfilEmpresa";
 
 export default function PerfilPage() {
   const { user } = useAuth();
@@ -10,15 +11,21 @@ export default function PerfilPage() {
       <h2 className="text-3xl font-bold mb-4">Perfil</h2>
 
       <div className="mb-6 text-gray-200">
-        <p><strong>Nombre:</strong> {user?.nombre}</p>
-        <p><strong>Correo:</strong> {user?.email}</p>
-        <p><strong>Rol:</strong> {user?.rol}</p>
+        <p>
+          <strong>Nombre:</strong> {user?.nombre}
+        </p>
+        <p>
+          <strong>Correo:</strong> {user?.email}
+        </p>
+        <p>
+          <strong>Rol:</strong> {user?.rol}
+        </p>
       </div>
 
       <hr className="my-6 border-gray-700" />
 
-   
-      <MisRetos />
+      {user.rol === "PARTICIPANTE" && <MisRetos />}
+      {user.rol === "EMPRESA" && <PerfilEmpresa />}
     </section>
   );
 }
