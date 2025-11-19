@@ -10,13 +10,20 @@ export default function HomePage() {
         Retos reales para talento real
       </h1>
 
-      <p className="text-lg text-gray-300 mb-8">
-        Participa en retos de empresas, colabora en equipo y construye tu
-        portfolio.
-      </p>
+      {/* TEXTO SEGÚN EL ROL */}
+      {user?.rol === "EMPRESA" ? (
+        <p className="text-lg text-gray-300 mb-8">
+          Crea retos y descubre talento real evaluando habilidades a través de
+          desafíos prácticos.
+        </p>
+      ) : (
+        <p className="text-lg text-gray-300 mb-8">
+          Participa en retos de empresas, colabora en equipo y construye tu
+          portfolio.
+        </p>
+      )}
 
       <div className="flex items-center gap-6 text-lg">
-        {/* Siempre visible */}
         <Link
           to="/retos"
           className="text-blue-400 underline hover:text-blue-300"
@@ -24,6 +31,7 @@ export default function HomePage() {
           Ver retos
         </Link>
 
+        {/* Si NO se está logueado */}
         {!user && (
           <>
             <Link

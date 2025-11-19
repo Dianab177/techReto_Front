@@ -22,14 +22,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  
   const login = useCallback(async (email: string, password: string) => {
     try {
       const usuario = await loginUsuario(email, password);
       setUser(usuario);
       localStorage.setItem("tr_user", JSON.stringify(usuario));
 
-      
       setToken(null);
       localStorage.removeItem("tr_token");
     } catch (error) {
@@ -37,7 +35,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       throw error;
     }
   }, []);
-
 
   const register = useCallback(async (payload: Usuario) => {
     try {
@@ -50,7 +47,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-
   const logout = useCallback(() => {
     setUser(null);
     setToken(null);
@@ -59,7 +55,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     navigate("/");
   }, [navigate]);
 
-  // 🔹 Valor del contexto (sin warnings)
   const value = useMemo(
     () => ({ user, token, login, register, logout }),
     [user, token, login, register, logout]

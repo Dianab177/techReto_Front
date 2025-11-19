@@ -176,7 +176,8 @@ export default function TablaInscripciones({ idReto }: Props) {
                 onChange={(e) =>
                   setInscripcionSeleccionada({
                     ...inscripcionSeleccionada,
-                    estadoEntrega: e.target.value,
+                    estadoEntrega: e.target
+                      .value as Inscripcion["estadoEntrega"],
                   })
                 }
                 className="block w-full mt-1 p-2 border rounded"

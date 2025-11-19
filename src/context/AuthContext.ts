@@ -12,5 +12,5 @@ export interface AuthContextValue extends AuthState {
   logout: () => void;
 }
 
-// ✅ Solo contiene el contexto
+
 export const AuthContext = createContext<AuthContextValue | undefined>(undefined);

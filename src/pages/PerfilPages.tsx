@@ -2,6 +2,9 @@ import { useAuth } from "../hooks/useAuth";
 import MisRetos from "../components/MisRetos";
 import PerfilEmpresa from "../components/PerfilEmpresa";
 
+import CompetenciaBadge from "../components/CompetenciaBadge";
+import { parseCompetencias } from "../utils/parseCompetencias";
+
 export default function PerfilPage() {
   const { user } = useAuth();
   if (!user) return null;
@@ -20,6 +23,24 @@ export default function PerfilPage() {
         <p>
           <strong>Rol:</strong> {user?.rol}
         </p>
+
+        {user.rol === "PARTICIPANTE" && (
+          <div className="mt-4">
+            <strong>Competencias:</strong>
+
+            {parseCompetencias(user.competencias).length === 0 ? (
+              <p className="text-gray-400 mt-1 text-sm">
+                No has indicado competencias
+              </p>
+            ) : (
+              <div className="mt-2 flex flex-wrap">
+                {parseCompetencias(user.competencias).map((skill, idx) => (
+                  <CompetenciaBadge key={idx} skill={skill} />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       <hr className="my-6 border-gray-700" />

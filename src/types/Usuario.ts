@@ -4,4 +4,5 @@ export interface Usuario {
   email: string;
   password?: string;
   rol: "ADMIN" | "EMPRESA" | "PARTICIPANTE";
+  competencias?: string;
 }
