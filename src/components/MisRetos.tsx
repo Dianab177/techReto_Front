@@ -5,6 +5,7 @@ import {
   eliminarInscripcion,
 } from "../services/inscripcionService";
 import Swal from "sweetalert2";
+import axios from "axios";
 import type { Inscripcion } from "../types/Inscripcion";
 
 export default function MisRetos() {
@@ -12,9 +13,13 @@ export default function MisRetos() {
   const [inscripciones, setInscripciones] = useState<Inscripcion[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // ============================================================
-  //   FUNCIÓN PARA CALCULAR LA VALORACIÓN DEL RETO
-  // ============================================================
+  // Modal entrega
+  const [mostrarModal, setMostrarModal] = useState(false);
+  const [inscripcionActual, setInscripcionActual] =
+    useState<Inscripcion | null>(null);
+  const [enlace, setEnlace] = useState("");
+
+  // Valoración automática
   function obtenerValoracion(ins: Inscripcion): string {
     const fechaFin = ins.reto?.fechaFin ? new Date(ins.reto.fechaFin) : null;
     const hoy = new Date();
@@ -24,16 +29,13 @@ export default function MisRetos() {
 
     if (ins.estadoEntrega === "ENTREGADO") return "Pendiente evaluación";
 
-    if (fechaFin && hoy > fechaFin && ins.estadoEntrega === "PENDIENTE") {
+    if (fechaFin && hoy > fechaFin && ins.estadoEntrega === "PENDIENTE")
       return "No entregado (vencido)";
-    }
 
     return "Pendiente";
   }
 
-  // ============================================================
-  //   CARGAR INSCRIPCIONES DEL USUARIO
-  // ============================================================
+  // Cargar inscripciones del usuario
   useEffect(() => {
     if (!user?.idUsuario) return;
 
@@ -49,9 +51,7 @@ export default function MisRetos() {
     })();
   }, [user]);
 
-  // ============================================================
-  //   DARSE DE BAJA DE UN RETO
-  // ============================================================
+  // Baja del reto
   const handleEliminar = async (id: number) => {
     const confirm = await Swal.fire({
       title: "¿Deseas darte de baja de este reto?",
@@ -68,9 +68,51 @@ export default function MisRetos() {
     }
   };
 
-  // ============================================================
-  //   RENDER
-  // ============================================================
+  // Abrir modal de entrega
+  const abrirModalEntrega = (ins: Inscripcion) => {
+    setInscripcionActual(ins);
+    setEnlace(ins.enlaceRepositorio || "");
+    setMostrarModal(true);
+  };
+
+  // Guardar entrega
+  const guardarEntrega = async () => {
+    if (!inscripcionActual) return;
+
+    if (!enlace.trim()) {
+      Swal.fire("Falta el enlace", "Introduce un enlace válido", "warning");
+      return;
+    }
+
+    try {
+      const payload = {
+        ...inscripcionActual,
+        enlaceRepositorio: enlace,
+        estadoEntrega: "ENTREGADO",
+      };
+
+      await axios.put(
+        `http://localhost:8080/api/inscripciones/${inscripcionActual.idInscripcion}`,
+        payload
+      );
+
+      Swal.fire("Entrega enviada", "Has entregado tu reto", "success");
+      setMostrarModal(false);
+
+      // Actualizar tabla
+      setInscripciones((prev) =>
+        prev.map((i) =>
+          i.idInscripcion === inscripcionActual.idInscripcion
+            ? { ...i, enlaceRepositorio: enlace, estadoEntrega: "ENTREGADO" }
+            : i
+        )
+      );
+    } catch (err) {
+      console.error(err);
+      Swal.fire("Error", "No se pudo enviar la entrega", "error");
+    }
+  };
+
   if (loading) return <p className="text-center mt-10">Cargando...</p>;
 
   if (!inscripciones.length)
@@ -91,9 +133,9 @@ export default function MisRetos() {
             <th className="p-2">Empresa</th>
             <th className="p-2">Inicio</th>
             <th className="p-2">Fin</th>
-            <th className="p-2">Estado</th>
-            <th className="p-2">Valoración</th> {/* ← Nueva columna */}
-            <th className="p-2">Acción</th>
+            <th className="p-2">Entrega</th>
+            <th className="p-2">Valoración</th>
+            <th className="p-2">Acciones</th>
           </tr>
         </thead>
 
@@ -108,10 +150,27 @@ export default function MisRetos() {
               <td>{i.reto?.fechaInicio || "—"}</td>
               <td>{i.reto?.fechaFin || "—"}</td>
 
-              {/* Estado simple */}
-              <td>{i.estado}</td>
+              {/* Entrega */}
+              <td>
+                {i.enlaceRepositorio ? (
+                  <a
+                    href={i.enlaceRepositorio}
+                    target="_blank"
+                    className="text-emerald-600 underline"
+                  >
+                    Ver entrega
+                  </a>
+                ) : (
+                  <button
+                    onClick={() => abrirModalEntrega(i)}
+                    className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
+                  >
+                    Entregar
+                  </button>
+                )}
+              </td>
 
-              {/* VALORACIÓN CALCULADA */}
+              {/* Valoración */}
               <td>{obtenerValoracion(i)}</td>
 
               <td>
@@ -119,13 +178,46 @@ export default function MisRetos() {
                   onClick={() => handleEliminar(i.idInscripcion)}
                   className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
                 >
-                  Darse de baja
+                  Baja
                 </button>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
+
+      {/* Modal Entrega */}
+      {mostrarModal && inscripcionActual && (
+        <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
+          <div className="bg-white p-6 rounded shadow w-96">
+            <h3 className="text-xl font-semibold mb-4">
+              Entregar reto: {inscripcionActual.reto?.titulo}
+            </h3>
+
+            <input
+              type="text"
+              placeholder="Pega tu enlace (GitHub, Figma, Loom...)"
+              value={enlace}
+              onChange={(e) => setEnlace(e.target.value)}
+              className="w-full p-2 border rounded mb-3"
+            />
+
+            <button
+              onClick={guardarEntrega}
+              className="bg-emerald-600 text-white w-full py-2 rounded hover:bg-emerald-700"
+            >
+              Enviar entrega
+            </button>
+
+            <button
+              className="mt-2 text-center w-full text-sm text-red-600"
+              onClick={() => setMostrarModal(false)}
+            >
+              Cancelar
+            </button>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

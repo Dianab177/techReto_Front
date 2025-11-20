@@ -46,3 +46,21 @@ export async function getInscripcionesPorReto(
 export async function ocultarInscripcion(idInscripcion: number) {
   await axios.patch(`${API_URL}/ocultar/${idInscripcion}`);
 } 
+
+// ======================================================
+//  ENTREGAR RETO (enviar enlaces)
+// ======================================================
+export async function entregarReto(
+  idInscripcion: number,
+  enlaces: {
+    enlaceRepositorio?: string;
+    enlaceFigma?: string;
+    enlaceDemo?: string;
+  }
+) {
+  const { data } = await axios.put(
+    `${API_URL}/${idInscripcion}/entregar`,
+    enlaces
+  );
+  return data;
+}

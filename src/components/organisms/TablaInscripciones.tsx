@@ -10,19 +10,28 @@ import EstadoBadge from "../atoms/EstadoBadge";
 import Swal from "sweetalert2";
 
 interface Props {
-  idReto?: number; // Puede llegar undefined, controlado
+  idReto?: number;
 }
+
+type InscripcionEditable = Inscripcion & {
+  enlaceRepositorio?: string;
+};
 
 export default function TablaInscripciones({ idReto }: Props) {
   const [inscripciones, setInscripciones] = useState<Inscripcion[]>([]);
   const [loading, setLoading] = useState(true);
+
   const [inscripcionSeleccionada, setInscripcionSeleccionada] =
-    useState<Inscripcion | null>(null);
+    useState<InscripcionEditable | null>(null);
+
   const [mostrarModal, setMostrarModal] = useState(false);
 
-  // 🔹 Cargar inscripciones del reto
+  // ===============================
+  //   CARGAR INSCRIPCIONES DEL RETO
+  // ===============================
   useEffect(() => {
-    if (!idReto) return; // evita el 404 si idReto es undefined
+    if (!idReto) return;
+
     (async () => {
       try {
         const data = await getInscripcionesPorReto(idReto);
@@ -36,7 +45,9 @@ export default function TablaInscripciones({ idReto }: Props) {
     })();
   }, [idReto]);
 
-  // 🔹 Eliminar inscripción
+  // ===============================
+  //   ELIMINAR INSCRIPCIÓN
+  // ===============================
   const handleEliminar = async (idInscripcion: number) => {
     const confirm = await Swal.fire({
       title: "¿Eliminar inscripción?",
@@ -48,38 +59,55 @@ export default function TablaInscripciones({ idReto }: Props) {
       confirmButtonColor: "#dc2626",
     });
 
-    if (confirm.isConfirmed) {
-      try {
-        await eliminarInscripcion(idInscripcion);
-        Swal.fire("Eliminado", "La inscripción fue eliminada", "success");
-        setInscripciones((prev) =>
-          prev.filter((i) => i.idInscripcion !== idInscripcion)
-        );
-      } catch (error) {
-        console.error("Error al eliminar:", error);
-        Swal.fire("Error", "No se pudo eliminar la inscripción", "error");
-      }
+    if (!confirm.isConfirmed) return;
+
+    try {
+      await eliminarInscripcion(idInscripcion);
+      Swal.fire("Eliminado", "La inscripción fue eliminada", "success");
+
+      setInscripciones((prev) =>
+        prev.filter((i) => i.idInscripcion !== idInscripcion)
+      );
+    } catch (error) {
+      console.error("Error al eliminar inscripción:", error);
+      Swal.fire("Error", "No se pudo eliminar", "error");
     }
   };
 
-  // 🔹 Guardar cambios en el modal
+  // ===============================
+  //   GUARDAR CAMBIOS DEL MODAL
+  // ===============================
   const handleGuardar = async () => {
     if (!inscripcionSeleccionada) return;
 
     try {
+      const payload = {
+        estadoEntrega: inscripcionSeleccionada.estadoEntrega,
+        estadoAprobacion: inscripcionSeleccionada.estadoAprobacion,
+        enlaceRepositorio: inscripcionSeleccionada.enlaceRepositorio ?? null,
+      };
+
       await axios.put(
         `http://localhost:8080/api/inscripciones/${inscripcionSeleccionada.idInscripcion}`,
-        inscripcionSeleccionada
+        payload
       );
 
       Swal.fire("Guardado", "Estado actualizado correctamente", "success");
       setMostrarModal(false);
 
-      // Actualizar la tabla localmente
-      setInscripciones((prev) =>
-        prev.map((i) =>
+      // Actualizar tabla
+      // Actualizar tabla local
+      setInscripciones((prev: Inscripcion[]) =>
+        prev.map((i: Inscripcion) =>
           i.idInscripcion === inscripcionSeleccionada.idInscripcion
-            ? inscripcionSeleccionada
+            ? {
+                ...i,
+                estadoEntrega: payload.estadoEntrega ?? i.estadoEntrega,
+                estadoAprobacion:
+                  payload.estadoAprobacion ?? i.estadoAprobacion,
+                enlaceRepositorio:
+                  payload.enlaceRepositorio ?? i.enlaceRepositorio,
+              }
             : i
         )
       );
@@ -106,13 +134,15 @@ export default function TablaInscripciones({ idReto }: Props) {
           <thead className="bg-slate-700 text-sm uppercase">
             <tr>
               <th className="py-2 px-3">#</th>
-              <th className="py-2 px-3">Usuario / Equipo</th>
-              <th className="py-2 px-3">Fecha inscripción</th>
+              <th className="py-2 px-3">Usuario</th>
+              <th className="py-2 px-3">Inscrito</th>
               <th className="py-2 px-3">Entrega</th>
-              <th className="py-2 px-3">Aprobado</th>
+              <th className="py-2 px-3">Link</th>
+              <th className="py-2 px-3">Aprobación</th>
               <th className="py-2 px-3">Acciones</th>
             </tr>
           </thead>
+
           <tbody>
             {inscripciones.map((i, idx) => (
               <tr
@@ -120,34 +150,52 @@ export default function TablaInscripciones({ idReto }: Props) {
                 className="border-b border-slate-600 hover:bg-slate-700 transition"
               >
                 <td className="py-2 px-3">{idx + 1}</td>
-                <td className="py-2 px-3">
-                  {i.equipo ? (
-                    <span className="font-semibold text-emerald-400">
-                      🧑‍🤝‍🧑 {i.equipo.nombre}
-                    </span>
-                  ) : (
-                    i.usuario?.nombre
-                  )}
-                </td>
+
+                <td className="py-2 px-3">{i.usuario?.nombre}</td>
+
                 <td className="py-2 px-3">
                   {new Date(i.fechaInscripcion).toLocaleDateString()}
                 </td>
+
                 <td className="py-2 px-3">
                   <EstadoBadge estado={i.estadoEntrega || "PENDIENTE"} />
                 </td>
+
+                {/* LINK ENTREGA */}
+                <td className="py-2 px-3">
+                  {(i as InscripcionEditable).enlaceRepositorio ? (
+                    <a
+                      href={(i as InscripcionEditable).enlaceRepositorio}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-emerald-400 underline"
+                    >
+                      Ver entrega
+                    </a>
+                  ) : (
+                    <span className="text-gray-400">—</span>
+                  )}
+                </td>
+
                 <td className="py-2 px-3">
                   <EstadoBadge estado={i.estadoAprobacion || "—"} />
                 </td>
+
                 <td className="py-2 px-3 flex gap-2">
                   <button
                     onClick={() => {
-                      setInscripcionSeleccionada(i);
+                      setInscripcionSeleccionada({
+                        ...i,
+                        enlaceRepositorio:
+                          (i as InscripcionEditable).enlaceRepositorio ?? "",
+                      });
                       setMostrarModal(true);
                     }}
                     className="bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded text-xs"
                   >
                     ✏️ Editar
                   </button>
+
                   <button
                     onClick={() => handleEliminar(i.idInscripcion)}
                     className="bg-red-600 hover:bg-red-700 px-2 py-1 rounded text-xs"
@@ -161,9 +209,11 @@ export default function TablaInscripciones({ idReto }: Props) {
         </table>
       )}
 
-      {/* 🔹 Modal de edición */}
+      {/* =============================== */}
+      {/* MODAL */}
+      {/* =============================== */}
       {mostrarModal && inscripcionSeleccionada && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+        <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
           <div className="bg-white text-black p-6 rounded-lg shadow-lg w-96">
             <h2 className="text-lg font-semibold mb-4">
               Editar inscripción #{inscripcionSeleccionada.idInscripcion}
@@ -184,9 +234,42 @@ export default function TablaInscripciones({ idReto }: Props) {
               >
                 <option value="PENDIENTE">Pendiente</option>
                 <option value="ENTREGADO">Entregado</option>
+              </select>
+            </label>
+
+            <label className="block mb-3 text-sm">
+              Estado de aprobación:
+              <select
+                value={inscripcionSeleccionada.estadoAprobacion || "PENDIENTE"}
+                onChange={(e) =>
+                  setInscripcionSeleccionada({
+                    ...inscripcionSeleccionada,
+                    estadoAprobacion: e.target
+                      .value as Inscripcion["estadoAprobacion"],
+                  })
+                }
+                className="block w-full mt-1 p-2 border rounded"
+              >
+                <option value="PENDIENTE">Pendiente</option>
                 <option value="APROBADO">Aprobado</option>
                 <option value="RECHAZADO">Rechazado</option>
               </select>
+            </label>
+
+            <label className="block mb-3 text-sm">
+              Enlace del proyecto:
+              <input
+                type="text"
+                value={inscripcionSeleccionada.enlaceRepositorio || ""}
+                onChange={(e) =>
+                  setInscripcionSeleccionada({
+                    ...inscripcionSeleccionada,
+                    enlaceRepositorio: e.target.value,
+                  })
+                }
+                className="block w-full mt-1 p-2 border rounded"
+                placeholder="https://github.com/... o Figma..."
+              />
             </label>
 
             <div className="flex justify-end gap-2 mt-4">

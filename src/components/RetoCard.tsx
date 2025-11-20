@@ -14,7 +14,7 @@ export default function RetoCard({ reto }: { reto: Reto }) {
       </div>
 
       <Link
-        to={`/retos/${reto.idReto}`}  // 👈 aquí se usa idReto
+        to={`/retos/${reto.idReto}`}
         className="inline-block mt-4 px-3 py-1 bg-slate-900 text-white rounded text-sm hover:bg-slate-700"
       >
         Ver descripción

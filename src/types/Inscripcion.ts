@@ -10,7 +10,6 @@ export interface Inscripcion {
   equipo?: {
     idEquipo: number;
     nombre: string;
-    miembros?: { nombre: string; rol?: string; entrega?: string }[];
   };
 
   fechaInscripcion: string;
@@ -18,8 +17,11 @@ export interface Inscripcion {
   estado: "PENDIENTE" | "ACEPTADA" | "RECHAZADA" | "COMPLETADA";
 
   estadoEntrega?: "PENDIENTE" | "ENTREGADO";
+  estadoAprobacion?: "PENDIENTE" | "APROBADO" | "RECHAZADO";
 
-  estadoAprobacion?: "APROBADO" | "RECHAZADO";
+  enlaceRepositorio?: string;
+  enlaceFigma?: string;
+  enlaceDemo?: string;
 
   reto?: {
     idReto: number;
