@@ -19,6 +19,8 @@
 
 a {
   font-weight: 500;
+  font-size: 1.5rem;
+  margin: 24px;
   color: #646cff;
   text-decoration: inherit;
 }
