@@ -96,7 +96,6 @@ export default function TablaInscripciones({ idReto }: Props) {
       setMostrarModal(false);
 
       // Actualizar tabla
-      // Actualizar tabla local
       setInscripciones((prev: Inscripcion[]) =>
         prev.map((i: Inscripcion) =>
           i.idInscripcion === inscripcionSeleccionada.idInscripcion

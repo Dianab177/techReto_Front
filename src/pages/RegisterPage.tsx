@@ -15,7 +15,7 @@ export default function RegisterPage() {
   });
 
   const [password, setPassword] = useState("");
-  const [competencias, setCompetencias] = useState(""); // 🆕 NUEVO
+  const [competencias, setCompetencias] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   const onSubmit = async (e: FormEvent) => {
@@ -78,7 +78,6 @@ export default function RegisterPage() {
             <option value="EMPRESA">Empresa</option>
           </select>
 
-          {/* 🆕 INPUT DE COMPETENCIAS */}
           {form.rol === "PARTICIPANTE" && (
             <textarea
               className="border p-2 rounded min-h-[80px]"

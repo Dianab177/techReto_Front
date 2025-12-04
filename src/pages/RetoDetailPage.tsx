@@ -93,7 +93,7 @@ export default function RetoDetailPage() {
 
       if (backendMessage === "El usuario ya está inscrito") {
         Swal.fire(
-          "Ya estás inscrita",
+          "Ya estás inscrito",
           "No puedes volver a apuntarte a un reto en el que ya participaste.",
           "info"
         );
@@ -161,7 +161,7 @@ export default function RetoDetailPage() {
             </button>
           ) : (
             <p className="mt-6 text-emerald-400 font-semibold">
-              ✔ Ya estás inscrita en este reto
+              ✔ Ya estás inscrito en este reto
             </p>
           )}
         </>

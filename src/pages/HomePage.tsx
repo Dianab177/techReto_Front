@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
+import InfoApp from "../components/InfoApp";
 
 export default function HomePage() {
   const { user } = useAuth();
@@ -9,7 +10,7 @@ export default function HomePage() {
       <h1 className="text-5xl font-bold mb-4">
         Retos reales para talento real
       </h1>
-
+      <InfoApp />
       {/* TEXTO SEGÚN EL ROL */}
       {user?.rol === "EMPRESA" ? (
         <p className="text-lg text-gray-300 mb-8">
