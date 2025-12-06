@@ -198,7 +198,7 @@ export default function AdminPage() {
       {esEmpresa && (
         <form
           onSubmit={crearReto}
-          className="bg-white p-4 rounded border mb-8 space-y-3"
+          className="bg-slate-950 p-4 rounded border mb-8 space-y-3"
         >
           <input
             type="text"
@@ -212,7 +212,7 @@ export default function AdminPage() {
             placeholder="Descripción"
             value={descripcion}
             onChange={(e) => setDescripcion(e.target.value)}
-            className="border p-2 w-full rounded min-h-[80px]"
+            className="border p-2 w-full rounded min-h-[20]"
           />
 
           <div className="grid grid-cols-2 gap-4">
@@ -344,7 +344,7 @@ export default function AdminPage() {
       =================== */}
       {editando && (
         <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
-          <div className="bg-white p-6 rounded shadow w-[420px]">
+          <div className="bg-slate-950 p-6 rounded shadow w-[420px]">
             <h2 className="text-xl font-bold mb-4">Editar reto</h2>
 
             <input

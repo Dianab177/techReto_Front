@@ -123,7 +123,7 @@ export default function MisRetos() {
     );
 
   return (
-    <section className="max-w-5xl mx-auto p-6 bg-white rounded-lg shadow">
+    <section className="max-w-5xl mx-auto p-6  dark:bg-white/10 rounded-lg shadow">
       <h2 className="text-2xl font-bold mb-4">Mis Retos</h2>
 
       <table className="w-full border border-gray-300 rounded-md">
@@ -156,14 +156,14 @@ export default function MisRetos() {
                   <a
                     href={i.enlaceRepositorio}
                     target="_blank"
-                    className="text-emerald-600 underline"
+                    className="text-yellow-400 underline"
                   >
                     Ver entrega
                   </a>
                 ) : (
                   <button
                     onClick={() => abrirModalEntrega(i)}
-                    className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
+                    className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-700"
                   >
                     Entregar
                   </button>
@@ -210,7 +210,7 @@ export default function MisRetos() {
             </button>
 
             <button
-              className="mt-2 text-center w-full text-sm text-red-600"
+              className="mt-2 text-center w-full text-sm text-gray-200"
               onClick={() => setMostrarModal(false)}
             >
               Cancelar

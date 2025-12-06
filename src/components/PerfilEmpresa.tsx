@@ -143,7 +143,7 @@ export default function PerfilEmpresa() {
                   <a
                     href={i.enlaceRepositorio}
                     target="_blank"
-                    className="text-emerald-400 underline"
+                    className="text-yellow-400 underline"
                   >
                     🔧 Repositorio
                   </a>
@@ -191,7 +191,7 @@ export default function PerfilEmpresa() {
       {/* ============================= */}
       {mostrarModal && inscripcionSeleccionada && (
         <div className="fixed inset-0 bg-black/60 flex justify-center items-center z-50">
-          <div className="bg-white text-black p-6 rounded shadow w-96">
+          <div className="dark:bg-gray-800 text-gray-100 p-6 rounded shadow w-96">
             <h3 className="text-lg font-bold mb-4">Editar evaluación</h3>
 
             {/* Estado de entrega */}
@@ -205,7 +205,7 @@ export default function PerfilEmpresa() {
                     estadoEntrega: e.target.value as "PENDIENTE" | "ENTREGADO",
                   })
                 }
-                className="w-full mt-1 p-2 border rounded"
+                className="w-full dark:bg-gray-900 mt-1 p-2 border rounded"
               >
                 <option value="PENDIENTE">Pendiente</option>
                 <option value="ENTREGADO">Entregado</option>
@@ -226,7 +226,7 @@ export default function PerfilEmpresa() {
                       | "RECHAZADO",
                   })
                 }
-                className="w-full mt-1 p-2 border rounded"
+                className="w-full dark:bg-gray-900 mt-1 p-2 border rounded"
               >
                 <option value="PENDIENTE">Pendiente</option>
                 <option value="APROBADO">Aprobado</option>
@@ -243,7 +243,7 @@ export default function PerfilEmpresa() {
               </button>
               <button
                 onClick={handleGuardar}
-                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded"
+                className="px-4 py-2 bg-yellow-200 hover:bg-yellow-700 text-white rounded"
               >
                 Guardar cambios
               </button>

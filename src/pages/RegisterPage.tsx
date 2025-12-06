@@ -1,12 +1,18 @@
 import type { FormEvent } from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import type { Usuario } from "../types/Usuario";
 
 export default function RegisterPage() {
-  const { register } = useAuth();
+  const { register, user } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user) {
+      navigate("/dashboard");
+    }
+  }, [user, navigate]);
 
   const [form, setForm] = useState<Pick<Usuario, "nombre" | "email" | "rol">>({
     nombre: "",
@@ -80,7 +86,7 @@ export default function RegisterPage() {
 
           {form.rol === "PARTICIPANTE" && (
             <textarea
-              className="border p-2 rounded min-h-[80px]"
+              className="border p-2 rounded min-h-20"
               placeholder="Tus competencias (React, Java, UX, SQL, Testing...)"
               value={competencias}
               onChange={(e) => setCompetencias(e.target.value)}

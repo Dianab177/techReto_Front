@@ -1,6 +1,8 @@
 import { Route, Routes } from "react-router-dom";
-import Navbar from "./components/Navbar";
-import HomePage from "./pages/HomePage";
+import PublicLayout from "./layout/PublicLayout";
+import DashboardLayout from "./layout/Dashboardlayout";
+
+import HomePage from "./pages/LandinPage";
 import LoginPage from "./pages/LoginPages";
 import RegisterPage from "./pages/RegisterPage";
 import RetosPage from "./pages/RetosPage";
@@ -10,29 +12,35 @@ import AdminPage from "./pages/AdminPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import MisRetosPage from "./components/MisRetos";
+import UsuariosPage from "./pages/UsuariosPage";
+import EvaluacionesPage from "./pages/EvaluacionesPage";
 
 export default function App() {
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
-      <Navbar />
-      <div className="max-w-6xl mx-auto p-4">
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
+    <Routes>
+      {/* PÚBLICO */}
+      <Route element={<PublicLayout />}>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+      </Route>
 
-          {/* Rutas privadas */}
-          <Route element={<ProtectedRoute />}>
-            <Route path="/retos" element={<RetosPage />} />
-            <Route path="/retos/:id" element={<RetoDetailPage />} />
-            <Route path="/perfil" element={<PerfilPage />} />
-            <Route path="/mis-retos" element={<MisRetosPage />} />
-            <Route path="/admin" element={<AdminPage />} />
-          </Route>
+      {/* PRIVADO */}
+      <Route element={<ProtectedRoute />}>
+        <Route element={<DashboardLayout />}>
+          <Route path="/dashboard" element={<RetosPage />} />
+          <Route path="/retos" element={<RetosPage />} />
+          <Route path="/retos/:id" element={<RetoDetailPage />} />
+          <Route path="/perfil" element={<PerfilPage />} />
+          <Route path="/mis-retos" element={<MisRetosPage />} />
+          <Route path="/admin" element={<AdminPage />} />
+          <Route path="/admin/usuarios" element={<UsuariosPage />} />
+          <Route path="/admin/evaluaciones" element={<EvaluacionesPage />} />
+        </Route>
+      </Route>
 
-          <Route path="*" element={<NotFoundPage />} />
-        </Routes>
-      </div>
-    </div>
+      {/* 404 */}
+      <Route path="*" element={<NotFoundPage />} />
+    </Routes>
   );
 }
