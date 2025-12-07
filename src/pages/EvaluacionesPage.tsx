@@ -142,7 +142,7 @@ export default function EvaluacionesPage() {
               onChange={(e) =>
                 setEditando({ ...editando, comentario: e.target.value })
               }
-              className="border p-2 w-full rounded mb-2 min-h-[80px]"
+              className="border p-2 w-full rounded mb-2 min-h-20"
             />
 
             <button

@@ -1,23 +1,21 @@
-import type { FormEvent } from "react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, type FormEvent } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import type { Usuario } from "../types/Usuario";
+import type { AxiosError } from "axios";
 
 export default function RegisterPage() {
   const { register, user } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (user) {
-      navigate("/dashboard");
-    }
+    if (user) navigate("/dashboard");
   }, [user, navigate]);
 
-  const [form, setForm] = useState<Pick<Usuario, "nombre" | "email" | "rol">>({
+  const [form, setForm] = useState({
     nombre: "",
     email: "",
-    rol: "PARTICIPANTE",
+    rol: "PARTICIPANTE" as Usuario["rol"],
   });
 
   const [password, setPassword] = useState("");
@@ -33,20 +31,17 @@ export default function RegisterPage() {
         ...form,
         password,
         competencias,
+        idUsuario: 0,
       });
 
       navigate("/retos");
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else if (typeof err === "object" && err && "response" in err) {
-        const axiosErr = err as { response?: { data?: { message?: string } } };
-        setError(
-          axiosErr.response?.data?.message || "No fue posible registrar"
-        );
-      } else {
-        setError("No fue posible registrar");
-      }
+    } catch (err) {
+      const axiosErr = err as AxiosError<{ message?: string }>;
+
+      const serverMessage =
+        axiosErr.response?.data?.message ?? axiosErr.message ?? null;
+
+      setError(serverMessage || "No fue posible registrar");
     }
   };
 
@@ -87,7 +82,7 @@ export default function RegisterPage() {
           {form.rol === "PARTICIPANTE" && (
             <textarea
               className="border p-2 rounded min-h-20"
-              placeholder="Tus competencias (React, Java, UX, SQL, Testing...)"
+              placeholder="Tus competencias"
               value={competencias}
               onChange={(e) => setCompetencias(e.target.value)}
             />

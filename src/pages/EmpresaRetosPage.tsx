@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { getRetosEmpresa } from "../services/retoServices";
 import { useAuth } from "../hooks/useAuth";
 import Loader from "../components/Loader";
@@ -11,7 +11,7 @@ export default function EmpresaRetosPage() {
   const [retos, setRetos] = useState<Reto[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const cargarRetos = async () => {
+  const cargarRetos = useCallback(async () => {
     if (!user) return;
 
     try {
@@ -23,11 +23,11 @@ export default function EmpresaRetosPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
   useEffect(() => {
     cargarRetos();
-  }, []);
+  }, [cargarRetos]);
 
   const eliminarReto = async (id: number) => {
     const ok = await Swal.fire({

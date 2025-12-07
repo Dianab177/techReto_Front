@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const baseURL = import.meta.env.VITE_API_BASE || "http://localhost:8080/api";
+const baseURL = import.meta.env.VITE_API_BASE || "https://techreto-back-production.up.railway.app/api";
 
 export const api = axios.create({
   baseURL,

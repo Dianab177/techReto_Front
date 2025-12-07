@@ -4,7 +4,9 @@ export interface Evaluacion {
   idEvaluacion: number;
   nota: number;
   comentario: string;
-  estado: string;
+
+  estado: "PENDIENTE" | "APROBADA" | "RECHAZADA"; 
+
   fechaEvaluacion: string;
 
   inscripcion: Inscripcion | null;

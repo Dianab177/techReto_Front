@@ -1,7 +1,7 @@
 import axios from "axios";
 import type { Usuario } from "../types/Usuario";
 
-const API_URL = "http://localhost:8080/api/usuarios";
+const API_URL = "https://techreto-back-production.up.railway.app/api/usuarios";
 
 // LOGIN
 export async function loginUsuario(

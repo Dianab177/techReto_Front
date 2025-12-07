@@ -28,15 +28,17 @@ export default function PerfilPage() {
           <div className="mt-4">
             <strong>Competencias:</strong>
 
-            {parseCompetencias(user.competencias).length === 0 ? (
+            {parseCompetencias(user.competencias ?? undefined).length === 0 ? (
               <p className="text-gray-400 mt-1 text-sm">
                 No has indicado competencias
               </p>
             ) : (
               <div className="mt-2 flex flex-wrap">
-                {parseCompetencias(user.competencias).map((skill, idx) => (
-                  <CompetenciaBadge key={idx} skill={skill} />
-                ))}
+                {parseCompetencias(user.competencias ?? undefined).map(
+                  (skill, idx) => (
+                    <CompetenciaBadge key={idx} skill={skill} />
+                  )
+                )}
               </div>
             )}
           </div>

@@ -1,7 +1,7 @@
 import axios from "axios";
 import type { Inscripcion } from "../types/Inscripcion";
 
-const API_URL = "http://localhost:8080/api/inscripciones";
+const API_URL = "https://techreto-back-production.up.railway.app/api/inscripciones";
 
 // ======================================================
 //  INSCRIBIRSE

@@ -1,8 +1,8 @@
 export interface Usuario {
-  idUsuario?: number;
+  idUsuario: number;
   nombre: string;
   email: string;
-  password?: string;
+  password: string;
   rol: "ADMIN" | "EMPRESA" | "PARTICIPANTE";
-  competencias?: string;
+  competencias?: string | null;
 }

@@ -384,7 +384,13 @@ export default function AdminPage() {
               <select
                 value={editando.estado ?? "ABIERTO"}
                 onChange={(e) =>
-                  setEditando({ ...editando, estado: e.target.value })
+                  setEditando({
+                    ...editando,
+                    estado: e.target.value as
+                      | "ABIERTO"
+                      | "EN_CURSO"
+                      | "CERRADO",
+                  })
                 }
                 className="border p-2 rounded"
               >
