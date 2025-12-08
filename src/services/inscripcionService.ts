@@ -64,3 +64,14 @@ export async function entregarReto(
   );
   return data;
 }
+
+// ======================================================
+//  MUESTRA TODAS LAS INSCRIPCIONES ADMIN
+// ======================================================
+
+export async function getTodasInscripcionesAdmin(): Promise<Inscripcion[]> {
+  const response = await axios.get(
+    "https://techreto-back-production.up.railway.app/api/inscripciones/admin/todas"
+  );
+  return response.data;
+}
