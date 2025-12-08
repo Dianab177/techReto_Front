@@ -23,7 +23,7 @@ export default function SidebarAdmin() {
   const menu = [
     { name: "Dashboard", icon: HomeIcon, href: "/dashboard" },
     { name: "Usuarios", icon: UsersIcon, href: "/admin/usuarios" },
-    { name: "Retos", icon: BriefcaseIcon, href: "/retos" },
+    { name: "Retos", icon: BriefcaseIcon, href: "/admin" },
     {
       name: "Evaluaciones",
       icon: ClipboardDocumentListIcon,
