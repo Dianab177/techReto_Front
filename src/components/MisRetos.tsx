@@ -92,7 +92,7 @@ export default function MisRetos() {
       };
 
       await axios.put(
-        `http://localhost:8080/api/inscripciones/${inscripcionActual.idInscripcion}`,
+        `https://techreto-back-production.up.railway.app/api/${inscripcionActual.idInscripcion}`,
         payload
       );
 
