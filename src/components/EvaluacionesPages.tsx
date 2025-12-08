@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getTodasInscripcionesAdmin } from "../services/inscripcionService";
+import { getEvaluacionesAdmin } from "../services/evaluacionService";
 import type { Inscripcion } from "../types/Inscripcion";
 
 export default function EvaluacionesPage() {
@@ -9,7 +9,7 @@ export default function EvaluacionesPage() {
   useEffect(() => {
     (async () => {
       try {
-        const data = await getTodasInscripcionesAdmin();
+        const data = await getEvaluacionesAdmin();
         setInscripciones(data);
       } catch (err) {
         console.error("Error cargando evaluaciones:", err);
@@ -38,7 +38,7 @@ export default function EvaluacionesPage() {
 
         <tbody>
           {inscripciones.map((i) => (
-            <tr key={i.idInscripcion} className="border-t">
+            <tr key={i.idInscripcion} className="border-t text-center">
               <td className="p-2">{i.reto?.titulo}</td>
               <td className="p-2">{i.usuario?.nombre}</td>
               <td className="p-2">{i.estadoEntrega || "PENDIENTE"}</td>
