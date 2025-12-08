@@ -66,13 +66,12 @@ export async function entregarReto(
 }
 
 // ======================================================
-//  MUESTRA TODAS LAS INSCRIPCIONES ADMIN
+//  OBTENER TODAS LAS INSCRIPCIONES (ADMIN)
 // ======================================================
-
 export async function getTodasInscripcionesAdmin(): Promise<Inscripcion[]> {
-  const response = await axios.get(
-    "https://techreto-back-production.up.railway.app/api/inscripciones/admin/todas"
+  const { data } = await axios.get<Inscripcion[]>(
+    `${API_URL}/admin/todas`
   );
-  return response.data;
+  return data;
 }
 
