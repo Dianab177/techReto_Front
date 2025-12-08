@@ -36,7 +36,6 @@ export default function App() {
           <Route path="/admin" element={<AdminPage />} />
           <Route path="/admin/usuarios" element={<UsuariosPage />} />
           <Route path="/admin/evaluaciones" element={<EvaluacionesPage />} />
-          <Route path="/admin/evaluaciones" element={<EvaluacionesPage />} />
         </Route>
       </Route>
 
