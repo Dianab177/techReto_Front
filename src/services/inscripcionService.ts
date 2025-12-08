@@ -9,7 +9,7 @@ const API_URL = "https://techreto-back-production.up.railway.app/api/inscripcion
 export async function inscribirse(idUsuario: number, idReto: number) {
   const payload = { idUsuario, idReto };
   const { data } = await axios.post(API_URL, payload);
-  return data; // devuelve la inscripción creada
+  return data; 
 }
 
 // ======================================================
