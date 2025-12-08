@@ -38,7 +38,7 @@ export default function EvaluacionesPage() {
 
         <tbody>
           {inscripciones.map((i) => (
-            <tr key={i.idInscripcion} className="border-t text-center">
+            <tr key={i.idInscripcion} className="border-t">
               <td className="p-2">{i.reto?.titulo}</td>
               <td className="p-2">{i.usuario?.nombre}</td>
               <td className="p-2">{i.estadoEntrega || "PENDIENTE"}</td>
