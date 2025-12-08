@@ -189,7 +189,7 @@ export default function MisRetos() {
       {/* Modal Entrega */}
       {mostrarModal && inscripcionActual && (
         <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
-          <div className="bg-white p-6 rounded shadow w-96">
+          <div className="bg-slate-950 p-6 rounded shadow w-96">
             <h3 className="text-xl font-semibold mb-4">
               Entregar reto: {inscripcionActual.reto?.titulo}
             </h3>
