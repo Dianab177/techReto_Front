@@ -73,7 +73,7 @@ export default function PerfilEmpresa() {
       };
 
       await axios.put(
-        `https://techreto-back-production.up.railway.app/api/inscripciones/${inscripcionSeleccionada.idInscripcion}`,
+        `https://techreto-back-production.up.railway.app/api/${inscripcionSeleccionada.idInscripcion}`,
         payload
       );
       Swal.fire("Guardado", "Estado actualizado correctamente", "success");
