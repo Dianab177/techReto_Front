@@ -75,3 +75,4 @@ export async function getTodasInscripcionesAdmin(): Promise<Inscripcion[]> {
   );
   return response.data;
 }
+
