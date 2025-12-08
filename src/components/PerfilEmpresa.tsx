@@ -32,13 +32,13 @@ export default function PerfilEmpresa() {
       try {
         // Retos de esta empresa
         const { data: retosData } = await axios.get(
-          `http://localhost:8080/api/retos/empresa/${user.idUsuario}`
+          `https://techreto-back-production.up.railway.app/api/retos/empresa/${user.idUsuario}`
         );
         setRetos(retosData);
 
         // Inscripciones
         const { data: insData } = await axios.get(
-          "http://localhost:8080/api/inscripciones"
+          "https://techreto-back-production.up.railway.app/api/inscripciones"
         );
 
         // Filtrar solo las de retos de esta empresa
@@ -73,7 +73,7 @@ export default function PerfilEmpresa() {
       };
 
       await axios.put(
-        `http://localhost:8080/api/inscripciones/${inscripcionSeleccionada.idInscripcion}`,
+        `https://techreto-back-production.up.railway.app/api/${inscripcionSeleccionada.idInscripcion}`,
         payload
       );
 
