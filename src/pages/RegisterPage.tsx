@@ -30,17 +30,14 @@ export default function RegisterPage() {
       await register({
         ...form,
         password,
-        competencias,
-        idUsuario: 0,
+        competencias: form.rol === "PARTICIPANTE" ? competencias : null,
       });
 
       navigate("/retos");
     } catch (err) {
       const axiosErr = err as AxiosError<{ message?: string }>;
-
       const serverMessage =
         axiosErr.response?.data?.message ?? axiosErr.message ?? null;
-
       setError(serverMessage || "No fue posible registrar");
     }
   };
