@@ -19,7 +19,7 @@ export default function SidebarParticipante() {
   };
 
   const menu = [
-    { name: "Dashboard", icon: HomeIcon, href: "/dashboard" },
+    { name: "Home", icon: HomeIcon, href: "/" },
     { name: "Retos disponibles", icon: BriefcaseIcon, href: "/retos" },
     { name: "Mis retos", icon: ClipboardDocumentListIcon, href: "/mis-retos" },
     { name: "Perfil", icon: Cog6ToothIcon, href: "/perfil" },
