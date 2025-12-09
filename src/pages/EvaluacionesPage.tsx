@@ -1,55 +1,157 @@
 import { useEffect, useState } from "react";
-import { getTodasInscripcionesAdmin } from "../services/inscripcionService";
+import {
+  getEvaluacionesAdmin,
+  actualizarEvaluacion,
+  eliminarEvaluacion,
+} from "../services/evaluacionService";
 import type { Inscripcion } from "../types/Inscripcion";
 import Loader from "../components/Loader";
+import Swal from "sweetalert2";
 
 export default function EvaluacionesPage() {
-  const [inscripciones, setInscripciones] = useState<Inscripcion[]>([]);
+  const [evaluaciones, setEvaluaciones] = useState<Inscripcion[]>([]);
   const [loading, setLoading] = useState(true);
+  const [editando, setEditando] = useState<Inscripcion | null>(null);
+
+  const cargarEvaluaciones = async () => {
+    try {
+      setLoading(true);
+      const data = await getEvaluacionesAdmin(); // ESTA ES LA CORRECTA
+      setEvaluaciones(data);
+    } catch (error) {
+      console.error("Error cargando evaluaciones", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    (async () => {
-      try {
-        const data = await getTodasInscripcionesAdmin();
-        setInscripciones(data);
-      } catch (err) {
-        console.error("Error cargando evaluaciones:", err);
-      } finally {
-        setLoading(false);
-      }
-    })();
+    cargarEvaluaciones();
   }, []);
+
+  const guardarCambios = async () => {
+    if (!editando) return;
+
+    try {
+      await actualizarEvaluacion(editando.idInscripcion, editando);
+      Swal.fire("Actualizado", "La evaluación fue modificada", "success");
+      setEditando(null);
+      cargarEvaluaciones();
+    } catch (error) {
+      console.error(error);
+      Swal.fire("Error", "No se pudo guardar la evaluación", "error");
+    }
+  };
+
+  const eliminar = async (id: number) => {
+    const confirm = await Swal.fire({
+      title: "¿Eliminar evaluación?",
+      text: "Esta acción no se puede deshacer",
+      showCancelButton: true,
+      confirmButtonText: "Eliminar",
+      cancelButtonText: "Cancelar",
+      confirmButtonColor: "#dc2626",
+    });
+
+    if (!confirm.isConfirmed) return;
+
+    try {
+      await eliminarEvaluacion(id);
+      Swal.fire("Eliminada", "", "success");
+      cargarEvaluaciones();
+    } catch (error) {
+      console.error("Error al eliminar:", error);
+      Swal.fire("Error", "No se pudo eliminar", "error");
+    }
+  };
 
   if (loading) return <Loader />;
 
   return (
-    <section className="max-w-5xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-4">Evaluaciones</h1>
+    <section className="max-w-4xl mx-auto py-10">
+      <h1 className="text-3xl font-bold mb-6">Evaluaciones</h1>
 
-      {inscripciones.length === 0 ? (
-        <p className="text-gray-600">No hay inscripciones evaluables.</p>
-      ) : (
-        <table className="w-full border border-gray-300 rounded">
-          <thead className="bg-slate-800 text-white">
-            <tr>
-              <th className="p-2">Reto</th>
-              <th className="p-2">Participante</th>
-              <th className="p-2">Entrega</th>
-              <th className="p-2">Estado Empresa</th>
-            </tr>
-          </thead>
+      <div className="space-y-4">
+        {evaluaciones.length === 0 && (
+          <p className="text-gray-600">No hay evaluaciones registradas.</p>
+        )}
 
-          <tbody>
-            {inscripciones.map((i) => (
-              <tr key={i.idInscripcion} className="border-t">
-                <td className="p-2">{i.reto?.titulo}</td>
-                <td className="p-2">{i.usuario?.nombre}</td>
-                <td className="p-2">{i.estadoEntrega ?? "PENDIENTE"}</td>
-                <td className="p-2">{i.estadoAprobacion ?? "Sin evaluar"}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        {evaluaciones.map((ev) => (
+          <div
+            key={ev.idInscripcion}
+            className="bg-slate-800 text-white p-4 rounded border border-slate-600 shadow flex justify-between items-start gap-4"
+          >
+            <div>
+              <h3 className="font-bold text-lg">
+                {ev.reto?.titulo ?? "Reto desconocido"}
+              </h3>
+
+              <p className="text-sm mt-2">
+                <strong>Participante:</strong> {ev.usuario?.nombre}
+              </p>
+
+              <p className="text-sm">
+                <strong>Estado entrega:</strong> {ev.estadoEntrega}
+              </p>
+
+              <p className="text-sm">
+                <strong>Aprobación:</strong> {ev.estadoAprobacion}
+              </p>
+            </div>
+
+            <div className="flex flex-col items-end gap-2">
+              <button
+                onClick={() => setEditando(ev)}
+                className="text-blue-400 hover:underline text-sm"
+              >
+                Editar
+              </button>
+
+              <button
+                onClick={() => eliminar(ev.idInscripcion)}
+                className="text-red-400 hover:underline text-sm"
+              >
+                Eliminar
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* MODAL EDICIÓN */}
+      {editando && (
+        <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
+          <div className="bg-white text-black p-6 rounded shadow w-96">
+            <h2 className="text-xl font-bold mb-4">Editar evaluación</h2>
+
+            <select
+              value={editando.estadoAprobacion ?? ""}
+              onChange={(e) =>
+                setEditando({ ...editando, estadoAprobacion: e.target.value })
+              }
+              className="border p-2 w-full rounded mb-2"
+            >
+              <option value="">Seleccionar estado</option>
+              <option value="APROBADO">Aprobado</option>
+              <option value="RECHAZADO">Rechazado</option>
+              <option value="PENDIENTE">Pendiente</option>
+            </select>
+
+            <button
+              onClick={guardarCambios}
+              className="bg-slate-900 text-white w-full py-2 rounded"
+            >
+              Guardar cambios
+            </button>
+
+            <button
+              onClick={() => setEditando(null)}
+              className="text-center text-red-600 w-full mt-2"
+            >
+              Cancelar
+            </button>
+          </div>
+        </div>
       )}
     </section>
   );
