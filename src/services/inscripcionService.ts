@@ -9,7 +9,7 @@ const API_URL = "https://techreto-back-production.up.railway.app/api/inscripcion
 export async function inscribirse(idUsuario: number, idReto: number) {
   const payload = { idUsuario, idReto };
   const { data } = await axios.post(API_URL, payload);
-  return data; 
+  return data;
 }
 
 // ======================================================
@@ -37,18 +37,19 @@ export async function eliminarInscripcion(idInscripcion: number) {
 export async function getInscripcionesPorReto(
   idReto: number
 ): Promise<Inscripcion[]> {
-  const { data } = await axios.get<Inscripcion[]>(
-    `${API_URL}/reto/${idReto}`
-  );
+  const { data } = await axios.get<Inscripcion[]>(`${API_URL}/reto/${idReto}`);
   return data;
 }
 
+// ======================================================
+//  OCULTAR INSCRIPCIÓN
+// ======================================================
 export async function ocultarInscripcion(idInscripcion: number) {
   await axios.patch(`${API_URL}/ocultar/${idInscripcion}`);
-} 
+}
 
 // ======================================================
-//  ENTREGAR RETO (enviar enlaces)
+//  ENTREGAR RETO  (CORRECTO)
 // ======================================================
 export async function entregarReto(
   idInscripcion: number,
@@ -69,9 +70,6 @@ export async function entregarReto(
 //  OBTENER TODAS LAS INSCRIPCIONES (ADMIN)
 // ======================================================
 export async function getTodasInscripcionesAdmin(): Promise<Inscripcion[]> {
-  const { data } = await axios.get<Inscripcion[]>(
-    `${API_URL}/admin/todas`
-  );
+  const { data } = await axios.get<Inscripcion[]>(`${API_URL}/admin/todas`);
   return data;
 }
-
