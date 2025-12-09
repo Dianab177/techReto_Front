@@ -1,5 +1,4 @@
 import { useAuth } from "../hooks/useAuth";
-import MisRetos from "../components/MisRetos";
 import PerfilEmpresa from "../components/PerfilEmpresa";
 
 import CompetenciaBadge from "../components/CompetenciaBadge";
@@ -47,7 +46,7 @@ export default function PerfilPage() {
 
       <hr className="my-6 border-gray-700" />
 
-      {user.rol === "PARTICIPANTE" && <MisRetos />}
+      {/* SOLO EMPRESA */}
       {user.rol === "EMPRESA" && <PerfilEmpresa />}
     </section>
   );
