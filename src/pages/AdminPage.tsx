@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { getRetosEmpresa } from "../services/retoServices";
+import { toggleBloqueoReto } from "../services/retoServices";
 import { api } from "../services/api";
 import type { Reto } from "../types/Reto";
 import Loader from "../components/Loader";
@@ -146,12 +147,14 @@ export default function AdminPage() {
   // ============================
   const toggleBloqueo = async (id: number) => {
     try {
-      await api.put(`/retos/${id}/toggle-bloqueo`);
+      await toggleBloqueoReto(id);
+
       await Swal.fire(
         "Actualizado",
         "Se ha cambiado el estado de bloqueo del reto",
         "success"
       );
+
       cargarRetos();
     } catch (err) {
       console.error(err);
