@@ -146,7 +146,7 @@ export default function AdminPage() {
   // ============================
   const toggleBloqueo = async (id: number) => {
     try {
-      await api.put(`/retos/${id}/bloquear`);
+      await api.put(`/retos/${id}/boquear`);
       await Swal.fire(
         "Actualizado",
         "Se ha cambiado el estado de bloqueo del reto",
