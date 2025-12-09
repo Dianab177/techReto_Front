@@ -14,6 +14,8 @@ import ProtectedRoute from "./routes/ProtectedRoute";
 import MisRetosPage from "./components/MisRetos";
 import UsuariosPage from "./pages/UsuariosPage";
 import EvaluacionesPage from "./pages/EvaluacionesPage";
+import CrearRetoPage from "./pages/CrearRetoPage";
+import EmpresaRetosPage from "./pages/EmpresaRetosPage";
 
 export default function App() {
   return (
@@ -36,6 +38,8 @@ export default function App() {
           <Route path="/admin" element={<AdminPage />} />
           <Route path="/admin/usuarios" element={<UsuariosPage />} />
           <Route path="/admin/evaluaciones" element={<EvaluacionesPage />} />
+          <Route path="/empresa/retos" element={<EmpresaRetosPage />} />
+          <Route path="/empresa/crear" element={<CrearRetoPage />} />
         </Route>
       </Route>
 

@@ -14,6 +14,7 @@ export default function SidebarEmpresa() {
   const navigate = useNavigate();
   const { logout } = useAuth();
 
+  // Detecta la ruta activa
   const isActive = (href: string) => location.pathname === href;
 
   const handleLogout = () => {
@@ -32,17 +33,19 @@ export default function SidebarEmpresa() {
     {
       name: "Inscripciones",
       icon: ClipboardDocumentListIcon,
-      href: "/empresa/inscripciones",
+      href: "/admin/evaluaciones",
     },
-    { name: "Perfil empresa", icon: Cog6ToothIcon, href: "/empresa/perfil" },
+    { name: "Perfil empresa", icon: Cog6ToothIcon, href: "/perfil" },
   ];
 
   return (
     <div className="flex flex-col h-full py-6 space-y-8">
+      {/* Título */}
       <h2 className="text-lg font-bold text-gray-800 dark:text-gray-100">
         Empresa
       </h2>
 
+      {/* Menú principal */}
       <ul className="space-y-1">
         {menu.map((item) => (
           <li key={item.name}>
@@ -62,6 +65,7 @@ export default function SidebarEmpresa() {
         ))}
       </ul>
 
+      {/* Footer de la sidebar: logout */}
       <div className="border-t border-gray-200 pt-4 dark:border-white/10">
         <button
           type="button"
