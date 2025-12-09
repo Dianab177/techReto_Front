@@ -3,9 +3,9 @@ import { useAuth } from "../hooks/useAuth";
 import {
   getInscripcionesUsuario,
   eliminarInscripcion,
+  entregarReto,
 } from "../services/inscripcionService";
 import Swal from "sweetalert2";
-import axios from "axios";
 import type { Inscripcion } from "../types/Inscripcion";
 
 export default function MisRetos() {
@@ -85,15 +85,9 @@ export default function MisRetos() {
     }
 
     try {
-      const payload = {
+      await entregarReto(inscripcionActual.idInscripcion, {
         enlaceRepositorio: enlace,
-        estadoEntrega: "ENTREGADO",
-      };
-
-      await axios.put(
-        `https://techreto-back-production.up.railway.app/api/inscripciones/${inscripcionActual.idInscripcion}/entregar`,
-        payload
-      );
+      });
 
       Swal.fire("Entrega enviada", "Has entregado tu reto", "success");
       setMostrarModal(false);
