@@ -86,20 +86,18 @@ export default function MisRetos() {
 
     try {
       const payload = {
-        ...inscripcionActual,
         enlaceRepositorio: enlace,
         estadoEntrega: "ENTREGADO",
       };
 
       await axios.put(
-        `https://techreto-back-production.up.railway.app/api/${inscripcionActual.idInscripcion}`,
+        `https://techreto-back-production.up.railway.app/api/inscripciones/${inscripcionActual.idInscripcion}/entregar`,
         payload
       );
 
       Swal.fire("Entrega enviada", "Has entregado tu reto", "success");
       setMostrarModal(false);
 
-      // Actualizar tabla
       setInscripciones((prev) =>
         prev.map((i) =>
           i.idInscripcion === inscripcionActual.idInscripcion
